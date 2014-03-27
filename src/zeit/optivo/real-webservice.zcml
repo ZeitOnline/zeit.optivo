@@ -2,8 +2,11 @@
 
   <include package="zope.component" file="meta.zcml" />
 
-  <utility factory=".connection.Session.from_product_config" />
-  <utility factory=".connection.Mailing" />
   <utility factory=".mail.Optivo" />
+
+  <utility factory=".connection.session_from_product_config" />
+  <utility factory=".connection.Mailing" />
+  <utility factory=".connection.RecipientList" />
+  <utility factory=".connection.Recipient" />
 
 </configure>

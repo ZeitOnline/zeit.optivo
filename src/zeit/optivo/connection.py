@@ -1,4 +1,5 @@
 from zope.cachedescriptors.property import Lazy as cachedproperty
+import contextlib
 import suds.cache
 import suds.client
 import threading
@@ -42,15 +43,7 @@ class WebService(object):
                 return result
             except suds.WebFault, e:
                 raise zeit.optivo.interfaces.WebServiceError(
-                    e.fault.faultstring)
-
-    @property
-    def namespace(self):
-        return 'urn:%s/Rpc%s' % (
-            urlparse.urlparse(self.base_url).netloc, self.__class__.__name__)
-
-    def create(self, type_):
-        return self.client.factory.create('{%s}%s' % (self.namespace, type_))
+                    u'%s\n%s' % (e.fault.faultstring, e.fault.detail))
 
 
 class Session(WebService):
@@ -61,23 +54,110 @@ class Session(WebService):
         super(Session, self).__init__()
         self.username = username
         self.password = password
+        self._threadlocal = threading.local()
 
-    @classmethod
-    @zope.interface.implementer(zeit.optivo.interfaces.ISession)
-    def from_product_config(cls):
-        # soft dependency
-        import zope.app.appsetup.product
-        config = zope.app.appsetup.product.getProductConfiguration(
-            'zeit.optivo')
-        return cls(config['username'], config['password'])
+    @property
+    def current_session(self):
+        if not hasattr(self._threadlocal, 'session_id'):
+            return None
+        return self._threadlocal.session_id
+
+    @current_session.setter
+    def current_session(self, value):
+        self._threadlocal.session_id = value
 
     def login(self, mandant):
-        return self.call('login', mandant, self.username, self.password)
+        if not self.current_session:
+            id = self.call('login', mandant, self.username, self.password)
+            self.current_session = id
+        return self.current_session
 
     def logout(self, session):
+        self.current_session = None
         return self.call('logout', session)
 
 
-class Mailing(WebService):
+@zope.interface.implementer(zeit.optivo.interfaces.ISession)
+def session_from_product_config():
+    # soft dependency
+    import zope.app.appsetup.product
+    config = zope.app.appsetup.product.getProductConfiguration(
+        'zeit.optivo')
+    return Session(config['username'], config['password'])
+
+
+class LoggedInWebService(WebService):
+
+    def call(self, method_name, *args, **kw):
+        session_service = zope.component.getUtility(
+            zeit.optivo.interfaces.ISession)
+        return super(LoggedInWebService, self).call(
+            method_name, *((session_service.current_session,) + args), **kw)
+
+    def __getattr__(self, name):
+        return lambda *args, **kw: self.call(name, *args, **kw)
+
+
+class Mailing(LoggedInWebService):
 
     zope.interface.implements(zeit.optivo.interfaces.IMailing)
+
+    REGULAR = 'regular'
+
+    SEND_TEST_RESULT = {
+        0: 'success',
+        1: 'recipient locked',
+        2: 'recipient on opt-out list',
+        3: 'recipient not found',
+        4: 'recipient list not found',
+        5: 'recipient not in focus group',
+        6: 'too many bounces',
+    }
+
+
+class RecipientList(LoggedInWebService):
+
+    zope.interface.implements(zeit.optivo.interfaces.IRecipientList)
+
+    def find_list_by_name(self, name):
+        for id in self.getAllIds():
+            if self.getName(id) == name:
+                return id
+
+
+class Recipient(LoggedInWebService):
+
+    zope.interface.implements(zeit.optivo.interfaces.IRecipient)
+
+    ADD_RESULT = {
+        0: 'success',
+        1: 'invalid address',
+        2: 'on opt-out list',
+        3: 'blacklisted',
+        4: 'too many bounces',
+        5: 'already exists',
+        6: 'filtered',
+        7: 'unknown error',
+    }
+
+    def create_if_not_exists(self, list_id, email):
+        if self.contains(list_id, email):
+            return
+        NO_OPT_IN = 0
+        result = self.add2(
+            list_id, NO_OPT_IN, email, email, ['lastname'], [email])
+        result = self.ADD_RESULT.get(result, 'unknown error')
+        if result not in ['success', 'already exists']:
+            raise zeit.optivo.interfaces.WebServiceError(
+                'Adding recipient %r failed: %s' % (email, result))
+
+
+@contextlib.contextmanager
+def login(mandant):
+    session_service = zope.component.getUtility(
+        zeit.optivo.interfaces.ISession)
+    id = session_service.login(mandant)
+    try:
+        yield id
+    finally:
+        session_service.logout(id)
