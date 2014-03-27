@@ -14,9 +14,9 @@ setup(
     license='gocept proprietary',
     namespace_packages=['zeit'],
     install_requires=[
-        'grokcore.component',
         'setuptools',
         'suds',
+        'zope.cachedescriptors',
         'zope.component',
         'zope.interface',
     ],
