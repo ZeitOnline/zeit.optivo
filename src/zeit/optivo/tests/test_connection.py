@@ -3,6 +3,7 @@ import unittest
 import zeit.optivo.connection
 
 
+@unittest.skip('The test account seems to have been deactivated')
 class APITest(unittest.TestCase):
 
     def test_login(self):
