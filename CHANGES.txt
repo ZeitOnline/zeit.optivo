@@ -4,7 +4,7 @@ zeit.optivo changes
 1.0.0b2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Set subject of EMails instead of the internal name only (VIV-560).
 
 
 1.0.0b1 (2014-03-28)

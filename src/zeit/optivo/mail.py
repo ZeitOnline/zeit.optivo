@@ -53,6 +53,7 @@ class Optivo(object):
             # XXX Make prefix and sender_name configurable or parameters.
             [list_id], 'Newsletter', 'ZEIT ONLINE', 'UTF-8')
         self.mailing_service.setOpenTrackingEnabled(mailing, True)
+        self.mailing_service.setSubject(mailing, subject)
         self._validate_content(mailing, html, 'text/html')
         self._validate_content(mailing, text, 'text/plain')
         return mailing
