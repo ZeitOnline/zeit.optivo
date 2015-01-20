@@ -1,7 +1,11 @@
+import logging
 import zeit.optivo.connection
 import zeit.optivo.interfaces
 import zope.component
 import zope.interface
+
+
+log = logging.getLogger(__name__)
 
 
 class Optivo(object):
@@ -30,6 +34,7 @@ class Optivo(object):
 
     def send(self, mandant, recipientlist, subject, html, text):
         with zeit.optivo.connection.login(mandant):
+            log.info('Sending mail with subject "%s"', subject)
             mailing = self._create_mailing(recipientlist, subject, html, text)
             self.mailing_service.start(mailing)
 
@@ -38,6 +43,7 @@ class Optivo(object):
             testlist = self.recipientlist_service.find_list_by_name(
                 recipientlist)
             self.recipient_service.create_if_not_exists(testlist, to)
+            log.info('Testing mail with subject "%s" to %s', subject, to)
             mailing = self._create_mailing(recipientlist, subject, html, text)
             result = self.mailing_service.sendTestMail(mailing, testlist, to)
             result = self.mailing_service.SEND_TEST_RESULT[result]
