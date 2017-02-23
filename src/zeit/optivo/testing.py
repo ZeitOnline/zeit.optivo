@@ -6,13 +6,6 @@ import zope.interface
 log = logging.getLogger(__name__)
 
 
-settings = {
-    'username': 'stefan.ehlers@zeit.de',
-    'password': 'zeitonline2014',
-    'mandant': '74276897418',
-}
-
-
 class Optivo(object):
 
     zope.interface.implements(zeit.optivo.interfaces.IOptivo)

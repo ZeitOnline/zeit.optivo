@@ -1,4 +1,4 @@
-from zeit.optivo.testing import settings
+import os
 import unittest
 import zeit.optivo.connection
 
@@ -7,8 +7,9 @@ import zeit.optivo.connection
 class APITest(unittest.TestCase):
 
     def test_login(self):
+        env = os.environ
         api = zeit.optivo.connection.Session(
-            settings['username'], settings['password'])
-        id = api.login(settings['mandant'])
+            env['ZEIT_OPTIVO_USERNAME'], env['ZEIT_OPTIVO_PASSWORD'])
+        id = api.login(env['ZEIT_OPTIVO_MANDANT'])
         self.assertNotEqual(None, id)
         api.logout(id)
