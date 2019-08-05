@@ -95,6 +95,8 @@ class LoggedInWebService(WebService):
             method_name, *((session_service.current_session,) + args), **kw)
 
     def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
         return lambda *args, **kw: self.call(name, *args, **kw)
 
 
