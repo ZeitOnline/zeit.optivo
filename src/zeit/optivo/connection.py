@@ -1,9 +1,8 @@
 from zope.cachedescriptors.property import Lazy as cachedproperty
 import contextlib
-import suds.cache
-import suds.client
 import threading
-import urlparse
+import zeep
+import zeep.exceptions
 import zeit.optivo.interfaces
 import zope.interface
 
@@ -21,15 +20,12 @@ class WebService(object):
 
     @cachedproperty
     def client(self):
-        client = suds.client.Client(
-            self.wsdl,
-            # disable caching of the WSDL file, since it leads to intransparent
-            # behaviour when debugging.
-            # This means it is downloaded afresh every time, but that doesn't
-            # occur often, as the utility is instantiated only once, so it's
-            # not performance critical other otherwise bad.
-            cache=suds.cache.NoCache())
-        return client
+        # We intenionally don't cache the WSDL file, since that leads to
+        # intransparent behaviour when debugging.
+        # This means it is downloaded afresh every time, but that doesn't
+        # occur often, as the utility is instantiated only once, so it's
+        # not performance critical other otherwise bad.
+        return zeep.Client(self.wsdl)
 
     @property
     def wsdl(self):
@@ -41,9 +37,8 @@ class WebService(object):
                 method = getattr(self.client.service, method_name)
                 result = method(*args, **kw)
                 return result
-            except suds.WebFault, e:
-                raise zeit.optivo.interfaces.WebServiceError(
-                    u'%s\n%s' % (e.fault.faultstring, e.fault.detail))
+            except zeep.exceptions.Fault as e:
+                raise zeit.optivo.interfaces.WebServiceError(e.message)
 
 
 class Session(WebService):
