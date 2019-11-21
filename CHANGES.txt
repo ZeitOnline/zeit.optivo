@@ -1,7 +1,7 @@
 zeit.optivo changes
 ===================
 
-1.1.3 (unreleased)
+1.1.3 (2019-11-21)
 ------------------
 
 - Brown-bag 1.1.2 did not contain any code changes
