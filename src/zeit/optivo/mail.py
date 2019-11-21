@@ -57,7 +57,7 @@ class Optivo(object):
             recipientlist)
         mailing = self.mailing_service.create(
             self.mailing_service.REGULAR, subject, 'multipart/alternative',
-            self.mailing_service._create('ArrayOf_xsd_long', [list_id]),
+            self.mailing_service._create('ArrayOf_xsd_long', [int(list_id)]),
             # XXX Make prefix and sender_name configurable or parameters.
             'Newsletter', 'ZEIT ONLINE', 'UTF-8')
         self.mailing_service.setOpenTrackingEnabled(mailing, True)
