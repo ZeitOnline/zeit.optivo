@@ -40,6 +40,11 @@ class WebService(object):
             except zeep.exceptions.Fault as e:
                 raise zeit.optivo.interfaces.WebServiceError(e.message)
 
+    def _create(self, type_, *args, **kw):
+        cls = self.client.get_type('{urn:api.broadmail.de/soap11/Rpc%s}%s' % (
+            self.__class__.__name__, type_))
+        return cls(*args, **kw)
+
 
 class Session(WebService):
 
@@ -118,7 +123,7 @@ class RecipientList(LoggedInWebService):
 
     def find_list_by_name(self, name):
         for id in self.getAllIds():
-            if self.getName(id) == name:
+            if self.getName(id)._value_1 == name:
                 return id
 
 
@@ -142,7 +147,9 @@ class Recipient(LoggedInWebService):
             return
         NO_OPT_IN = 0
         result = self.add2(
-            list_id, NO_OPT_IN, email, email, ['lastname'], [email])
+            list_id, NO_OPT_IN, email, email,
+            self._create('ArrayOf_xsd_string', ['lastname']),
+            self._create('ArrayOf_xsd_string', [email]))
         result = self.ADD_RESULT.get(result, 'unknown error')
         if result not in ['success', 'already exists']:
             raise zeit.optivo.interfaces.WebServiceError(

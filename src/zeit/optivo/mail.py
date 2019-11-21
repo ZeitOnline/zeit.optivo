@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import zeit.optivo.connection
 import zeit.optivo.interfaces
@@ -36,7 +37,7 @@ class Optivo(object):
         with zeit.optivo.connection.login(mandant):
             log.info('Sending mail with subject "%s"', subject)
             mailing = self._create_mailing(recipientlist, subject, html, text)
-            self.mailing_service.start(mailing)
+            self.mailing_service.start(mailing, datetime.now())
 
     def test(self, mandant, recipientlist, to, subject, html, text):
         with zeit.optivo.connection.login(mandant):
@@ -56,8 +57,9 @@ class Optivo(object):
             recipientlist)
         mailing = self.mailing_service.create(
             self.mailing_service.REGULAR, subject, 'multipart/alternative',
+            self.mailing_service._create('ArrayOf_xsd_long', [list_id]),
             # XXX Make prefix and sender_name configurable or parameters.
-            [list_id], 'Newsletter', 'ZEIT ONLINE', 'UTF-8')
+            'Newsletter', 'ZEIT ONLINE', 'UTF-8')
         self.mailing_service.setOpenTrackingEnabled(mailing, True)
         self.mailing_service.setSubject(mailing, subject)
         self._validate_content(mailing, html, 'text/html')
@@ -67,7 +69,7 @@ class Optivo(object):
     def _validate_content(self, mailing, content, mime_type):
         valid = self.mailing_service.validateContent(
             mailing, mime_type, content)
-        if valid != 'OK':
+        if valid._value_1 != 'OK':
             raise zeit.optivo.interfaces.WebServiceError(
                 'Invalid mailing body: %s' % valid)
         self.mailing_service.encodeTrackingLinks(mailing, content, mime_type)
