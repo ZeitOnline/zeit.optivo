@@ -1,7 +1,7 @@
 zeit.optivo changes
 ===================
 
-1.1.4 (unreleased)
+1.1.4 (2019-11-25)
 ------------------
 
 - Set explicit timezone in the "send now" parameter
