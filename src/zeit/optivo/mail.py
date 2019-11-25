@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+import pytz
 import zeit.optivo.connection
 import zeit.optivo.interfaces
 import zope.component
@@ -37,7 +38,7 @@ class Optivo(object):
         with zeit.optivo.connection.login(mandant):
             log.info('Sending mail with subject "%s"', subject)
             mailing = self._create_mailing(recipientlist, subject, html, text)
-            self.mailing_service.start(mailing, datetime.now())
+            self.mailing_service.start(mailing, datetime.now(pytz.UTC))
 
     def test(self, mandant, recipientlist, to, subject, html, text):
         with zeit.optivo.connection.login(mandant):

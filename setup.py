@@ -15,6 +15,7 @@ setup(
     license='BSD',
     namespace_packages=['zeit'],
     install_requires=[
+        'pytz',
         'setuptools',
         'zeep',
         'zope.cachedescriptors',
