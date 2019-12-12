@@ -46,9 +46,8 @@ class WebService(object):
         return cls(*args, **kw)
 
 
+@zope.interface.implementer(zeit.optivo.interfaces.ISession)
 class Session(WebService):
-
-    zope.interface.implements(zeit.optivo.interfaces.ISession)
 
     def __init__(self, username, password):
         super(Session, self).__init__()
@@ -100,9 +99,8 @@ class LoggedInWebService(WebService):
         return lambda *args, **kw: self.call(name, *args, **kw)
 
 
+@zope.interface.implementer(zeit.optivo.interfaces.IMailing)
 class Mailing(LoggedInWebService):
-
-    zope.interface.implements(zeit.optivo.interfaces.IMailing)
 
     REGULAR = 'regular'
 
@@ -117,9 +115,8 @@ class Mailing(LoggedInWebService):
     }
 
 
+@zope.interface.implementer(zeit.optivo.interfaces.IRecipientList)
 class RecipientList(LoggedInWebService):
-
-    zope.interface.implements(zeit.optivo.interfaces.IRecipientList)
 
     def find_list_by_name(self, name):
         for id in self.getAllIds():
@@ -127,9 +124,8 @@ class RecipientList(LoggedInWebService):
                 return id
 
 
+@zope.interface.implementer(zeit.optivo.interfaces.IRecipient)
 class Recipient(LoggedInWebService):
-
-    zope.interface.implements(zeit.optivo.interfaces.IRecipient)
 
     ADD_RESULT = {
         0: 'success',

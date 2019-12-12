@@ -4,7 +4,7 @@ zeit.optivo changes
 1.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make py3 syntax compatible
 
 
 1.1.4 (2019-11-25)
