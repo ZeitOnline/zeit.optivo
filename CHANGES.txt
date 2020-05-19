@@ -4,7 +4,7 @@ zeit.optivo changes
 1.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix zope.interface py3 syntax
 
 
 1.1.5 (2019-12-12)
