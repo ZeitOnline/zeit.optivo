@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 @zope.interface.implementer(zeit.optivo.interfaces.IOptivo)
-class Optivo(object):
+class Optivo:
 
     def __init__(self):
         self.reset()

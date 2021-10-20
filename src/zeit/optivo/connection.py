@@ -7,7 +7,7 @@ import zeit.optivo.interfaces
 import zope.interface
 
 
-class WebService(object):
+class WebService:
     """This class handles the configuration of URL and authentication
     information, and provides better error handling for errors returned by the
     web service.
@@ -50,7 +50,7 @@ class WebService(object):
 class Session(WebService):
 
     def __init__(self, username, password):
-        super(Session, self).__init__()
+        super().__init__()
         self.username = username
         self.password = password
         self._threadlocal = threading.local()
@@ -90,7 +90,7 @@ class LoggedInWebService(WebService):
     def call(self, method_name, *args, **kw):
         session_service = zope.component.getUtility(
             zeit.optivo.interfaces.ISession)
-        return super(LoggedInWebService, self).call(
+        return super().call(
             method_name, *((session_service.current_session,) + args), **kw)
 
     def __getattr__(self, name):

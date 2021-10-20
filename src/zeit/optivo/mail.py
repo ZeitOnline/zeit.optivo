@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 @zope.interface.implementer(zeit.optivo.interfaces.IOptivo)
-class Optivo(object):
+class Optivo:
 
     @classmethod
     def setup(cls, username, password):
